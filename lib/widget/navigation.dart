@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:spendwise/pages/dashboard.dart';
-import 'package:spendwise/pages/home.dart';
 import 'package:spendwise/pages/login.dart';
 import 'package:spendwise/pages/register.dart';
 

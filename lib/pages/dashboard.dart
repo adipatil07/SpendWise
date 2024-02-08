@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spendwise/pages/login.dart';
 import 'package:spendwise/pages/register.dart';
+import 'package:spendwise/pages/transaction.dart';
+import 'package:spendwise/widget/mydrawer.dart';
 import 'package:spendwise/widget/navigation.dart';
 import 'package:spendwise/widget/transactionList.dart';
 
@@ -26,11 +28,8 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  double income = 1500.0;
-  double expense = 800.0;
-
-  final List<String> entries = <String>['A', 'B', 'C'];
-  final List<int> colorCodes = <int>[600, 500, 100];
+  final double income = 1500.0;
+  final double expense = 800.0;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +41,7 @@ class _DashboardState extends State<Dashboard> {
           "SpendWise",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Color.fromRGBO(35, 39, 60, 10),
+        backgroundColor: Color.fromRGBO(35, 26, 14, 0.965),
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
@@ -162,47 +161,56 @@ class _DashboardState extends State<Dashboard> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.04,
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.35,
-                    height: MediaQuery.of(context).size.width * 0.3,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color.fromARGB(255, 234, 204, 196),
-                          Color.fromARGB(255, 246, 191, 181),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                  InkWell(
+                    onTap: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Transaction()))
+                    },
+                    splashColor: Color.fromARGB(255, 0, 0, 0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.35,
+                      height: MediaQuery.of(context).size.width * 0.3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 234, 204, 196),
+                            Color.fromARGB(255, 246, 191, 181),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'images/expenses.png',
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            height: MediaQuery.of(context).size.width * 0.1,
-                            color: Colors.black,
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.width * 0.02,
-                          ),
-                          Text(
-                            'Expense',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          Text(
-                            '\$$availableBalance',
-                            style: TextStyle(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'images/expenses.png',
+                              width: MediaQuery.of(context).size.width * 0.1,
+                              height: MediaQuery.of(context).size.width * 0.1,
                               color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.06,
                             ),
-                          ),
-                        ],
+                            SizedBox(
+                              height: MediaQuery.of(context).size.width * 0.02,
+                            ),
+                            Text(
+                              'Expense',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            Text(
+                              '\$$availableBalance',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.06,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -235,7 +243,9 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
       ),
-      drawer: Drawer(),
+      drawer: Drawer(
+          backgroundColor: Color.fromRGBO(255, 255, 255, 0.965),
+          child: MyDrawer()),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentPageIndex,
         onTap: _onDestinationSelected,

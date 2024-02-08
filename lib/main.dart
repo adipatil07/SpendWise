@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:spendwise/pages/dashboard.dart';
 import 'package:spendwise/pages/home.dart';
 import 'package:spendwise/pages/login.dart';
+import 'package:spendwise/pages/transaction.dart';
 import 'package:spendwise/widget/navigation.dart';
 
 void main() {
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: GoogleFonts.lato().fontFamily,
       ),
-      home: Home(),
+      home: Dashboard(),
     );
   }
 }
@@ -55,7 +56,6 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
