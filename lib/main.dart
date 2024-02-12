@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:spendwise/pages/dashboard.dart';
 import 'package:spendwise/pages/home.dart';
 import 'package:spendwise/pages/login.dart';
-import 'package:spendwise/pages/transaction.dart';
+import 'package:spendwise/pages/expense_page.dart';
 import 'package:spendwise/widget/navigation.dart';
 
 void main() {

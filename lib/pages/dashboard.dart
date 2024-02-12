@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:spendwise/pages/login.dart';
-import 'package:spendwise/pages/register.dart';
-import 'package:spendwise/pages/transaction.dart';
+import 'package:spendwise/pages/expense_page.dart';
 import 'package:spendwise/widget/mydrawer.dart';
-import 'package:spendwise/widget/navigation.dart';
 import 'package:spendwise/widget/transactionList.dart';
 
 const _kPages = <String, IconData>{
   'home': Icons.home,
   'Categories': Icons.category_rounded,
   'Expense': Icons.add,
-  'message': Icons.message,
+  'Transaction': Icons.history,
   'people': Icons.people,
 };
 
@@ -20,16 +17,9 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _currentPageIndex = 0;
-
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _currentPageIndex = index;
-    });
-  }
-
   final double income = 1500.0;
   final double expense = 800.0;
+  int _currentPageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -247,26 +237,44 @@ class _DashboardState extends State<Dashboard> {
           backgroundColor: Color.fromRGBO(255, 255, 255, 0.965),
           child: MyDrawer()),
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.black,
         currentIndex: _currentPageIndex,
-        onTap: _onDestinationSelected,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Transaction',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category_outlined),
-            label: 'Categories',
-          ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.access_alarm),
-          //   label: 'Account',
-          // ),
-        ],
+        onTap: (index) {
+          setState(() {
+            _currentPageIndex = index;
+          });
+          if (index == 0) {
+            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+          } else if (index == 1) {
+            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+          } else if (index == 2) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => Transaction()));
+          } else if (index == 3) {
+            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+          } else if (index == 4) {
+            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+          }
+        },
+        items: _kPages.entries
+            .map(
+              (MapEntry<String, IconData> entry) => BottomNavigationBarItem(
+                icon: Icon(
+                  entry.value,
+                  color: Colors.black, // Change the color of unselected icons
+                ),
+                activeIcon: Icon(
+                  entry.value,
+                  color: Colors.purple, // Change the color of selected icons
+                ),
+                label:
+                    entry.key, // Set the text for the BottomNavigationBarItem
+              ),
+            )
+            .toList(),
+        selectedIconTheme: IconThemeData(color: Colors.purple),
+        unselectedIconTheme: IconThemeData(color: Colors.black),
+        selectedItemColor: Colors.purple,
       ),
     );
   }

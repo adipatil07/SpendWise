@@ -44,7 +44,7 @@ class _TransactionState extends State<Transaction> {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 25),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: MediaQuery.of(context).size.width * 0.05),
               Padding(
@@ -102,7 +102,7 @@ class _TransactionState extends State<Transaction> {
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.width * 0.03),
-              Text("Amount"),
+              // Text("Amount"),
               SizedBox(height: MediaQuery.of(context).size.width * 0.03),
               TextField(
                 decoration: InputDecoration(
@@ -222,25 +222,28 @@ class _TransactionState extends State<Transaction> {
               SizedBox(height: MediaQuery.of(context).size.width * 0.03),
               Padding(
                 padding: const EdgeInsets.only(left: 30, right: 30),
-                child: GestureDetector(
-                  onTap: () {
-                    // Add functionality here
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: Color(
-                            0xffFFBF9B)), // Set background color to orange
-                    child: Center(
-                      child: Text(
-                        "Add",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Add functionality here
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: Color(
+                              0xffFFBF9B)), // Set background color to orange
+                      child: Center(
+                        child: Text(
+                          "Add",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
