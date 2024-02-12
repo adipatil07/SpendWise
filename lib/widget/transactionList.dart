@@ -35,58 +35,6 @@ class TransactionList extends StatelessWidget {
               ),
             ),
           ),
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.dinner_dining),
-              title: Text("Lunch"),
-              subtitle: Text(
-                "Thursday, 18 Jan 2024, 1:00 PM", // Example date and time
-              ),
-              trailing: Text(
-                "150Rs",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.dinner_dining),
-              title: Text("Lunch"),
-              subtitle: Text(
-                "Thursday, 18 Jan 2024, 1:00 PM", // Example date and time
-              ),
-              trailing: Text(
-                "150Rs",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.dinner_dining),
-              title: Text("Lunch"),
-              subtitle: Text(
-                "Thursday, 18 Jan 2024, 1:00 PM", // Example date and time
-              ),
-              trailing: Text(
-                "150Rs",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: Icon(Icons.dinner_dining),
-              title: Text("Lunch"),
-              subtitle: Text(
-                "Thursday, 18 Jan 2024, 1:00 PM", // Example date and time
-              ),
-              trailing: Text(
-                "150Rs",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
         ],
       ),
     );

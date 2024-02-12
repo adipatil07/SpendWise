@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:spendwise/pages/category_page.dart';
 import 'package:spendwise/pages/expense_page.dart';
+import 'package:spendwise/pages/transaction_page.dart';
 import 'package:spendwise/widget/mydrawer.dart';
 import 'package:spendwise/widget/transactionList.dart';
 
@@ -246,12 +248,13 @@ class _DashboardState extends State<Dashboard> {
           if (index == 0) {
             // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
           } else if (index == 1) {
-            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+            Navigator.push(context,MaterialPageRoute(builder: (context) => category()));
           } else if (index == 2) {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => Transaction()));
           } else if (index == 3) {
-            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => transation()));
           } else if (index == 4) {
             // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
           }

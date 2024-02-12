@@ -1,6 +1,7 @@
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:spendwise/widget/category_list.dart';
+import 'package:spendwise/widget/category_types.dart';
 
 class Transaction extends StatefulWidget {
   @override
@@ -10,24 +11,11 @@ class Transaction extends StatefulWidget {
 class _TransactionState extends State<Transaction> {
   DateTime? _selectedValue = DateTime.now();
   late String _selectedCategory; // Track the selected category
-  final List<Map<String, String>> iconDataList = [
-    {"imagePath": "images/icons/clothes.png", "name": "Clothes"},
-    {"imagePath": "images/icons/destination.png", "name": "Travel"},
-    {"imagePath": "images/icons/sports.png", "name": "Sports"},
-    {"imagePath": "images/icons/holiday.png", "name": "Holidays"},
-    {"imagePath": "images/icons/shopping.png", "name": "Shopping"},
-    {"imagePath": "images/icons/fuel.png", "name": "Fuel"},
-    {"imagePath": "images/icons/eating.png", "name": "Eating"},
-    // Add more icon data as needed
-  ];
+  
 
-  final List<Map<String, String>> incomeIconDataList = [
-    {"imagePath": "images/icons/income.png", "name": "Home Income"},
-    {"imagePath": "images/icons/salary.png", "name": "Salary"},
-    {"imagePath": "images/icons/stock.png", "name": "Stock Market"},
+  
 
-    // Add more icon data as needed
-  ];
+ 
   bool isLeftSelected = true;
   @override
   void initState() {
