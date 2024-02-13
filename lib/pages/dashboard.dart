@@ -225,6 +225,10 @@ class _DashboardState extends State<Dashboard> {
                   ElevatedButton(
                     onPressed: () {
                       // Add your action when the "See All" button is pressed
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => transation()));
                     },
                     child: Text("See All"),
                   ),
@@ -248,13 +252,14 @@ class _DashboardState extends State<Dashboard> {
           if (index == 0) {
             // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
           } else if (index == 1) {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => category()));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => category()));
           } else if (index == 2) {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => Transaction()));
           } else if (index == 3) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => transation()));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => transation()));
           } else if (index == 4) {
             // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
           }

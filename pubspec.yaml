@@ -39,6 +39,8 @@ dependencies:
   convex_bottom_bar: ^3.2.0
   # date_picker_timeline: ^1.2.5
   easy_date_timeline: ^1.0.4
+  firebase_core: ^2.25.4
+  firebase_auth: ^4.17.4
 
 dev_dependencies:
   flutter_test:

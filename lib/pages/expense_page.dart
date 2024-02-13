@@ -11,11 +11,6 @@ class Transaction extends StatefulWidget {
 class _TransactionState extends State<Transaction> {
   DateTime? _selectedValue = DateTime.now();
   late String _selectedCategory; // Track the selected category
-  
-
-  
-
- 
   bool isLeftSelected = true;
   @override
   void initState() {
