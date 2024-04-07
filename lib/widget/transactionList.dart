@@ -57,7 +57,7 @@ class TransactionList extends StatelessWidget {
               return Card(
                 child: ListTile(
                   leading: Icon(Icons.dinner_dining),
-                  title: Text(data['category'] ?? ''),
+                  title: Text(data['subCategory'] ?? ''),
                   subtitle: Text(
                     formattedDateTime,
                   ),

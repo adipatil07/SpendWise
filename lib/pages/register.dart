@@ -1,9 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:spendwise/pages/dashboard.dart';
 import 'package:spendwise/pages/transaction_page.dart';
+import 'package:spendwise/widget/category_types.dart'; // Import your category types
 
 import 'login.dart';
+import 'package:flutter/material.dart';
+
+final List<Map<String, String>> iconDataList = [
+  {"imagePath": "images/icons/clothes.png", "name": "Clothes"},
+  {"imagePath": "images/icons/destination.png", "name": "Travel"},
+  {"imagePath": "images/icons/sports.png", "name": "Sports"},
+  {"imagePath": "images/icons/holiday.png", "name": "Holidays"},
+  {"imagePath": "images/icons/shopping.png", "name": "Shopping"},
+  {"imagePath": "images/icons/fuel.png", "name": "Fuel"},
+  {"imagePath": "images/icons/eating.png", "name": "Eating"},
+  // Add more icon data as needed
+];
+
+final List<Map<String, String>> incomeIconDataList = [
+  {"imagePath": "images/icons/income.png", "name": "Home Income"},
+  {"imagePath": "images/icons/salary.png", "name": "Salary"},
+  {"imagePath": "images/icons/stock.png", "name": "Stock Market"},
+];
 
 class Register extends StatefulWidget {
   @override
@@ -11,27 +31,39 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  TextEditingController emailController =  TextEditingController() ;
-
-  TextEditingController passController =  TextEditingController() ;
-
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passController = TextEditingController();
   TextEditingController cpasscontrolller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  signUp(String email , String pass) async{
-     UserCredential? userCredential;
-     try{
-       userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass) ;
-       print("Registration Succesful");
-       Navigator.push(context, MaterialPageRoute(builder: (context)=>Login()));
-     }
-     on FirebaseAuthException catch(ex){
-     }
+  signUp(String email, String pass) async {
+    try {
+      UserCredential? userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
+      print("Registration Succesful");
+
+      // Create user categories after successful registration
+      _createUserCategories(userCredential?.user?.uid ?? '');
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+    } on FirebaseAuthException catch (ex) {}
+  }
+
+  Future<void> _createUserCategories(String userId) async {
+    try {
+      // Upload default categories for the new user
+      await FirebaseFirestore.instance.doc(userId).collection('user_categories').add({
+        'expense_categories': iconDataList.map((category) => category['name']).toList(),
+        'income_categories': incomeIconDataList.map((category) => category['name']).toList(),
+      });
+      print('User categories created successfully.');
+    } catch (e) {
+      print('Error creating user categories: $e');
     }
+  }
+
 
   @override
   Widget build(BuildContext context) {
-
     return Material(
       color: Colors.black,
       child: Stack(

@@ -22,6 +22,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      routes: {
+        '/Home': (context) => Home(), // Replace HomeScreen() with the appropriate widget for your home screen
+      },
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -41,6 +44,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
         fontFamily: GoogleFonts.lato().fontFamily,
+
       ),
       home: Home(),
     );

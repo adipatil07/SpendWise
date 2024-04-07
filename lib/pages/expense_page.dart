@@ -2,18 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:spendwise/widget/category_list.dart';
 import 'package:spendwise/widget/category_types.dart';
-import 'dart:ui';
-class expensePage extends StatefulWidget {
 
+import '../widget/category_list.dart';
+
+class expensePage extends StatefulWidget {
   @override
   State<expensePage> createState() => _TransactionState();
 }
 
 class _TransactionState extends State<expensePage> {
   DateTime _selectedDate = DateTime.now();
-  String _selectedCategory = ''; // Track the selected category
+  String _selectedCategory = '';
   bool isLeftSelected = true;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,7 +26,7 @@ class _TransactionState extends State<expensePage> {
     _selectedCategory = iconDataList.first["name"] ?? ''; // Default to the first category
   }
 
-  Future<void> _addTransaction(double amount, DateTime date, String category, String description) async {
+  Future<void> _addTransaction(double amount, DateTime date, String mainCategory, String subCategory, String description) async {
     try {
       // Get current user's UID
       FirebaseAuth auth = FirebaseAuth.instance;
@@ -37,7 +37,8 @@ class _TransactionState extends State<expensePage> {
       await _firestore.collection('users').doc(uid).collection('transactions').add({
         'amount': amount,
         'date': date,
-        'category': category,
+        'mainCategory': mainCategory, // Main category: Income or Expense
+        'subCategory': subCategory, // Subcategory: Specific type of transaction
         'description': description,
         'timestamp': DateTime.now(),
       });
@@ -50,6 +51,7 @@ class _TransactionState extends State<expensePage> {
       // Optionally, display an error message to the user
     }
   }
+
 
 
   @override
@@ -238,7 +240,8 @@ class _TransactionState extends State<expensePage> {
                   onTap: () {
                     // Add functionality here
                     double amount = double.tryParse(amountController.text) ?? 0.0; // Parse the amount from TextField
-                    _addTransaction(amount, _selectedDate, _selectedCategory, descriptionController.text);
+                    String mainCategory = isLeftSelected ? 'Expense' : 'Income'; // Determine main category based on selection
+                    _addTransaction(amount, _selectedDate, mainCategory, _selectedCategory, descriptionController.text);
                   },
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.4,
@@ -255,6 +258,7 @@ class _TransactionState extends State<expensePage> {
                   ),
                 ),
               ),
+
             ],
           ),
         ),

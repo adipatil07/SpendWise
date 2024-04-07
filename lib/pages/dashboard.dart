@@ -23,6 +23,8 @@ class _DashboardState extends State<Dashboard> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<CategoryExpense> categoryExpenses = [];
   int _currentPageIndex = 0;
+  double totalIncome = 0.0;
+  double totalExpense = 0.0;
 
   @override
   void initState() {
@@ -33,37 +35,45 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> fetchCategoryExpenses() async {
     try {
-      // Get current user's UID
       FirebaseAuth auth = FirebaseAuth.instance;
       User? user = auth.currentUser;
       String uid = user?.uid ?? '';
 
-      // Fetch category-wise expenses from Firestore
+      DateTime now = DateTime.now();
+      DateTime firstDayOfMonth = DateTime(now.year, now.month, 1);
+      DateTime lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
       QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('users')
           .doc(uid)
           .collection('transactions')
+          .where('date', isGreaterThanOrEqualTo: firstDayOfMonth)
+          .where('date', isLessThanOrEqualTo: lastDayOfMonth)
           .get();
 
-      // Process fetched data
       Map<String, double> categoryAmountMap = {};
+      double income = 0.0;
+      double expense = 0.0;
 
-// Initialize the map with an empty map
       snapshot.docs.forEach((doc) {
-        String category = doc['category'];
-        double amount = doc['amount'];
-        // Check if the map contains the category
+        String category = doc['subCategory'];
+        double amount = doc['amount'] ?? 0.0; // Add a null check here
+        String mainCategory = doc['mainCategory']?.toString().toLowerCase() ?? ''; // Add a null check here
+
+        if (mainCategory == 'income') {
+          income += amount;
+        } else if (mainCategory == 'expense') {
+          expense += amount;
+        }
+
         if (categoryAmountMap.containsKey(category)) {
-          // If it does, add the amount to the existing value
-          categoryAmountMap[category] = (categoryAmountMap[category] ?? 0) + amount;
+          categoryAmountMap[category] = (categoryAmountMap[category] ?? 0) + amount; // Add a null check here
         } else {
-          // If not, set the amount as the value for the category
           categoryAmountMap[category] = amount;
         }
       });
 
 
-      // Convert data to CategoryExpense objects
       List<CategoryExpense> expenses = [];
       categoryAmountMap.forEach((category, amount) {
         expenses.add(CategoryExpense(category, amount));
@@ -71,65 +81,80 @@ class _DashboardState extends State<Dashboard> {
 
       setState(() {
         categoryExpenses = expenses;
+        totalIncome = income;
+        totalExpense = expense;
       });
     } catch (e) {
       print('Error fetching category expenses: $e');
     }
   }
 
-  // Listen for changes in the transactions collection
   void listenForTransactions() {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
-    String uid = user?.uid ?? '';
-    _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('transactions')
-        .snapshots()
-        .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
-      // Handle changes in the transactions collection
-      updateCategoryExpenses(snapshot);
-    });
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      String uid = user?.uid ?? '';
+      _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('transactions')
+          .snapshots()
+          .listen((QuerySnapshot<Map<String, dynamic>> snapshot) {
+        updateCategoryExpenses(snapshot);
+      });
+    } catch (e) {
+      print('Error listening for transactions: $e');
+    }
   }
 
-  // Update category expenses based on the changes in transactions
   void updateCategoryExpenses(QuerySnapshot<Map<String, dynamic>> snapshot) {
-    Map<String, double> categoryAmountMap = {};
+    try {
+      Map<String, double> categoryAmountMap = {};
+      double income = 0.0;
+      double expense = 0.0;
 
-    // Initialize the map with an empty map
-    snapshot.docs.forEach((doc) {
-      String category = doc['category'];
-      double amount = doc['amount'];
-      // Check if the map contains the category
-      if (categoryAmountMap.containsKey(category)) {
-        // If it does, add the amount to the existing value
-        categoryAmountMap[category] =
-            (categoryAmountMap[category] ?? 0) + amount;
-      } else {
-        // If not, set the amount as the value for the category
-        categoryAmountMap[category] = amount;
-      }
-    });
+      snapshot.docs.forEach((doc) {
+        String category = doc['subCategory'];
+        double amount = doc['amount'];
+        String mainCategory = doc['mainCategory']?.toString().toLowerCase() ?? '';
 
-    // Convert data to CategoryExpense objects
-    List<CategoryExpense> expenses = [];
-    categoryAmountMap.forEach((category, amount) {
-      expenses.add(CategoryExpense(category, amount));
-    });
+        if (mainCategory == 'income') {
+          income += amount;
+        } else if (mainCategory == 'expense') {
+          expense += amount;
+        }
 
-    setState(() {
-      categoryExpenses = expenses;
-    });
+        // Use null-aware operator ?? to provide a default value if the key is not present
+        categoryAmountMap[category] = (categoryAmountMap[category] ?? 0) + amount;
+      });
+
+      List<CategoryExpense> expenses = [];
+      categoryAmountMap.forEach((category, amount) {
+        expenses.add(CategoryExpense(category, amount));
+      });
+
+      setState(() {
+        categoryExpenses = expenses;
+        totalIncome = income;
+        totalExpense = expense;
+
+        // Update available balance
+        double availableBalance = totalIncome - totalExpense;
+        // Set the new value of available balance
+        // Ensure it's not negative
+        availableBalance = availableBalance >= 0 ? availableBalance : 0.0;
+        // Update availableBalance variable
+        availableBalance = availableBalance;
+      });
+    } catch (e) {
+      print('Error updating category expenses: $e');
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
-    double income = 1500.0; // Assuming these values are defined somewhere in your code
-    double expense = 800.0;
-
-    double availableBalance = income - expense;
-
+    double availableBalance = totalIncome- totalExpense ;
     return Scaffold(
       backgroundColor: Color.fromRGBO(245, 245, 255, 0.965),
       appBar: AppBar(
@@ -206,34 +231,8 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             SizedBox(height: 20.0),
-            categoryExpensesWidget(), // Display category-wise expenses
+            categoryExpensesWidget(),
             SizedBox(height: MediaQuery.of(context).size.width * 0.03),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Recent Transactions',
-                    style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width * 0.06,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add your action when the "See All" button is pressed
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => expensePage()));
-                    },
-                    child: Text("See All"),
-                  ),
-                ],
-              ),
-            ),
-            // TransactionList(),
           ],
         ),
       ),
@@ -248,10 +247,10 @@ class _DashboardState extends State<Dashboard> {
             _currentPageIndex = index;
           });
           if (index == 0) {
-            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+            // Navigate to home page
           } else if (index == 1) {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => category()));
+                context, MaterialPageRoute(builder: (context) => Category()));
           } else if (index == 2) {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => expensePage()));
@@ -259,7 +258,7 @@ class _DashboardState extends State<Dashboard> {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => transation()));
           } else if (index == 4) {
-            // Navigator.push(context,MaterialPageRoute(builder: (context) => Transaction()));
+            // Navigate to people page
           }
         },
         items: _kPages.entries
@@ -267,14 +266,13 @@ class _DashboardState extends State<Dashboard> {
               (MapEntry<String, IconData> entry) => BottomNavigationBarItem(
             icon: Icon(
               entry.value,
-              color: Colors.black, // Change the color of unselected icons
+              color: Colors.black,
             ),
             activeIcon: Icon(
               entry.value,
-              color: Colors.purple, // Change the color of selected icons
+              color: Colors.purple,
             ),
-            label:
-            entry.key, // Set the text for the BottomNavigationBarItem
+            label: entry.key,
           ),
         )
             .toList(),
@@ -300,7 +298,6 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
         ),
-        // Display each category expense
         ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
