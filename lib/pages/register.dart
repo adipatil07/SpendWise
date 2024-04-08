@@ -8,7 +8,7 @@ import 'package:spendwise/widget/category_types.dart'; // Import your category t
 import 'login.dart';
 import 'package:flutter/material.dart';
 
-final List<Map<String, String>> iconDataList = [
+final List<Map<String, dynamic>> iconDataList = [
   {"imagePath": "images/icons/clothes.png", "name": "Clothes"},
   {"imagePath": "images/icons/destination.png", "name": "Travel"},
   {"imagePath": "images/icons/sports.png", "name": "Sports"},
@@ -19,7 +19,7 @@ final List<Map<String, String>> iconDataList = [
   // Add more icon data as needed
 ];
 
-final List<Map<String, String>> incomeIconDataList = [
+final List<Map<String, dynamic>> incomeIconDataList = [
   {"imagePath": "images/icons/income.png", "name": "Home Income"},
   {"imagePath": "images/icons/salary.png", "name": "Salary"},
   {"imagePath": "images/icons/stock.png", "name": "Stock Market"},
@@ -28,6 +28,35 @@ final List<Map<String, String>> incomeIconDataList = [
 class Register extends StatefulWidget {
   @override
   State<Register> createState() => _RegisterState();
+}
+Future<void> uploadCategoriesToFirestore( List<Map<String, dynamic>> incomeCategories, List<Map<String, dynamic>> expenseCategories) async {
+  try {
+
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+    String uid = user?.uid ?? '';
+
+    // Reference to the user's document in Firestore
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
+
+    // Reference to the income and expense subcollections under the user's document
+    CollectionReference incomeCollectionRef = userDocRef.collection('incomeCategories');
+    CollectionReference expenseCollectionRef = userDocRef.collection('expenseCategories');
+
+    // Upload income categories
+    for (Map<String, dynamic> category in incomeCategories) {
+      await incomeCollectionRef.add(category);
+    }
+
+    // Upload expense categories
+    for (Map<String, dynamic> category in expenseCategories) {
+      await expenseCollectionRef.add(category);
+    }
+
+    print('Income and expense categories uploaded successfully');
+  } catch (e) {
+    print('Error uploading categories: $e');
+  }
 }
 
 class _RegisterState extends State<Register> {
@@ -43,7 +72,7 @@ class _RegisterState extends State<Register> {
 
       // Create user categories after successful registration
       _createUserCategories(userCredential?.user?.uid ?? '');
-
+      uploadCategoriesToFirestore( incomeIconDataList, iconDataList);
       Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
     } on FirebaseAuthException catch (ex) {}
   }

@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+
+
 import 'package:spendwise/widget/category_types.dart';
 
 class Category extends StatefulWidget {
@@ -9,72 +10,15 @@ class Category extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<Category> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool isExpenseSelected = true;
 
   @override
   void initState() {
     super.initState();
-    fetchCategories(); // Fetch categories when the widget initializes
   }
 
-  void fetchCategories() async {
-    try {
-      QuerySnapshot querySnapshot =
-      await _firestore.collection('categories').get();
+  // Function to upload categories to Firestore
 
-      // Check if there are any documents
-      if (querySnapshot.docs.isNotEmpty) {
-        List<Map<String, String>> expenseCategories = [];
-        List<Map<String, String>> incomeCategories = [];
-
-        // Loop through documents and populate the lists
-        querySnapshot.docs.forEach((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          if (data['isExpense']) {
-            expenseCategories.add({
-              'name': data['name'],
-              'imagePath': data['imagePath'],
-            });
-          } else {
-            incomeCategories.add({
-              'name': data['name'],
-              'imagePath': data['imagePath'],
-            });
-          }
-        });
-
-        setState(() {
-          iconDataList = expenseCategories;
-          incomeIconDataList = incomeCategories;
-        });
-      }
-    } catch (e) {
-      print('Error fetching categories: $e');
-    }
-  }
-
-  Future<void> uploadCategories(List<Map<String, String>> categories, bool isExpense, String userId) async {
-    try {
-      // Reference the user's document
-      DocumentReference userDocRef = _firestore.collection('users').doc(userId);
-
-      // Reference the categories subcollection under the user's document
-      CollectionReference categoriesCollectionRef = userDocRef.collection('categories');
-
-      // Clear existing categories in the subcollection
-      await categoriesCollectionRef.doc(isExpense ? 'expense' : 'income').delete();
-
-      // Upload updated categories to the subcollection
-      categories.forEach((category) async {
-        await categoriesCollectionRef.doc(isExpense ? 'expense' : 'income').set(category);
-      });
-
-      print('Categories updated successfully.');
-    } catch (e) {
-      print('Error uploading categories: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +29,8 @@ class _CategoryScreenState extends State<Category> {
           IconButton(
             icon: Icon(Icons.save),
             onPressed: () {
-              FirebaseAuth auth = FirebaseAuth.instance;
-              User? user = auth.currentUser;
-              String uid = user?.uid ?? '';
-               // Replace with the actual user's document ID
-              uploadCategories(iconDataList, true, uid); // Upload expense categories
-              uploadCategories(incomeIconDataList, false, uid);// Upload income categories
+
+
             },
           ),
         ],
