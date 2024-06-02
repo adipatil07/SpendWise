@@ -2,16 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:spendwise/widget/category_types.dart';
+import '../widget/category_list.dart'; // Ensure this path is correct
+import '../widget/categoryService.dart';
 
-import '../widget/category_list.dart';
-
-class expensePage extends StatefulWidget {
+class ExpensePage extends StatefulWidget {
   @override
-  State<expensePage> createState() => _TransactionState();
+  State<ExpensePage> createState() => _TransactionState();
 }
 
-class _TransactionState extends State<expensePage> {
+class _TransactionState extends State<ExpensePage> {
   DateTime _selectedDate = DateTime.now();
   String _selectedCategory = '';
   bool isLeftSelected = true;
@@ -20,42 +19,62 @@ class _TransactionState extends State<expensePage> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
+  List<CategoryList> expenseCategories = [];
+  List<CategoryList> incomeCategories = [];
+
   @override
   void initState() {
     super.initState();
-    _selectedCategory = iconDataList.first["name"] ?? ''; // Default to the first category
+    fetchCategories();
   }
 
-  Future<void> _addTransaction(double amount, DateTime date, String mainCategory, String subCategory, String description) async {
+  Future<void> fetchCategories() async {
     try {
-      // Get current user's UID
-      FirebaseAuth auth = FirebaseAuth.instance;
-      User? user = auth.currentUser;
-      String uid = user?.uid ?? '';
-
-      // Add transaction details to Firestore
-      await _firestore.collection('users').doc(uid).collection('transactions').add({
-        'amount': amount,
-        'date': date,
-        'mainCategory': mainCategory, // Main category: Income or Expense
-        'subCategory': subCategory, // Subcategory: Specific type of transaction
-        'description': description,
-        'timestamp': DateTime.now(),
+      List<List<Map<String, String>>> categories = await CategoryService.getCategories();
+      List<CategoryList> expenseList = categories[1].map<CategoryList>((category) => CategoryList(name: category["name"]!, imagePath: category["imagePath"]!, isSelected: false)).toList();
+      List<CategoryList> incomeList = categories[0].map<CategoryList>((category) => CategoryList(name: category["name"]!, imagePath: category["imagePath"]!, isSelected: false)).toList();
+      setState(() {
+        expenseCategories = expenseList;
+        incomeCategories = incomeList;
+        _selectedCategory = (isLeftSelected && expenseCategories.isNotEmpty
+            ? expenseCategories.first.name
+            : incomeCategories.isNotEmpty
+            ? incomeCategories.first.name
+            : '')!;
       });
-
-      // Navigate back to the dashboard page after adding the transaction
-      Navigator.pop(context); // This will pop the expensePage off the navigation stack
-
-    } catch (e) {
-      print('Error adding transaction: $e');
-      // Optionally, display an error message to the user
+    } catch (error) {
+      print("Error fetching categories: $error");
     }
   }
 
 
 
+  Future<void> _addTransaction(double amount, DateTime date, String mainCategory, String subCategory, String description) async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      String uid = user?.uid ?? '';
+
+      await _firestore.collection('users').doc(uid).collection('transactions').add({
+        'amount': amount,
+        'date': date,
+        'mainCategory': mainCategory,
+        'subCategory': subCategory,
+        'description': description,
+        'timestamp': DateTime.now(),
+      });
+
+      Navigator.pop(context);
+
+    } catch (e) {
+      print('Error adding transaction: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<CategoryList> selectedCategories = isLeftSelected ? expenseCategories : incomeCategories;
+
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
@@ -73,7 +92,8 @@ class _TransactionState extends State<expensePage> {
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          isLeftSelected = true; // Select the left container
+                          isLeftSelected = true;
+                          _selectedCategory = (expenseCategories.isNotEmpty ? expenseCategories.first.name : '')!;
                         });
                       },
                       child: Container(
@@ -94,7 +114,8 @@ class _TransactionState extends State<expensePage> {
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          isLeftSelected = false; // Select the right container
+                          isLeftSelected = false;
+                          _selectedCategory = (incomeCategories.isNotEmpty ? incomeCategories.first.name : '')!;
                         });
                       },
                       child: Container(
@@ -122,7 +143,7 @@ class _TransactionState extends State<expensePage> {
                 decoration: InputDecoration(
                   prefixIcon: Image.asset(
                     "images/icons/rs.png",
-                    height: 12, // Set the height here as desired
+                    height: 12,
                     width: 12,
                   ),
                   labelText: "Amount",
@@ -169,19 +190,19 @@ class _TransactionState extends State<expensePage> {
                 height: 100,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: iconDataList.length,
+                  itemCount: expenseCategories.length,
                   itemBuilder: (context, index) {
-                    final iconData = iconDataList[index];
+                    final category = expenseCategories[index];
                     return Padding(
                       padding: const EdgeInsets.only(right: 10.0),
                       child: CategoryList(
-                        imagePath: iconData["imagePath"]!,
-                        name: iconData["name"]!,
-                        isSelected: iconData["name"] == _selectedCategory,
+                        imagePath: category.imagePath,
+                        name: category.name,
+                        isSelected: category.name == _selectedCategory,
                         onSelect: (isSelected) {
                           setState(() {
                             if (isSelected) {
-                              _selectedCategory = iconData["name"]!;
+                              _selectedCategory = category.name!;
                             }
                           });
                         },
@@ -194,19 +215,19 @@ class _TransactionState extends State<expensePage> {
                 height: 100,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: incomeIconDataList.length,
+                  itemCount: incomeCategories.length,
                   itemBuilder: (context, index) {
-                    final iconData = incomeIconDataList[index];
+                    final category = incomeCategories[index];
                     return Padding(
                       padding: const EdgeInsets.only(right: 10.0),
                       child: CategoryList(
-                        imagePath: iconData["imagePath"]!,
-                        name: iconData["name"]!,
-                        isSelected: iconData["name"] == _selectedCategory,
+                        imagePath: category.imagePath,
+                        name: category.name,
+                        isSelected: category.name == _selectedCategory,
                         onSelect: (isSelected) {
                           setState(() {
                             if (isSelected) {
-                              _selectedCategory = iconData["name"]!;
+                              _selectedCategory = category.name!;
                             }
                           });
                         },
@@ -221,9 +242,7 @@ class _TransactionState extends State<expensePage> {
               Container(
                 decoration: BoxDecoration(
                   color: Color.fromARGB(255, 236, 233, 233),
-                  // borderRadius: BorderRadius.circular(10)
                 ),
-                // padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: descriptionController,
                   maxLines: 4,
@@ -238,27 +257,27 @@ class _TransactionState extends State<expensePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: GestureDetector(
                   onTap: () {
-                    // Add functionality here
-                    double amount = double.tryParse(amountController.text) ?? 0.0; // Parse the amount from TextField
-                    String mainCategory = isLeftSelected ? 'Expense' : 'Income'; // Determine main category based on selection
+                    double amount = double.tryParse(amountController.text) ?? 0.0;
+                    String mainCategory = isLeftSelected ? 'Expense' : 'Income';
                     _addTransaction(amount, _selectedDate, mainCategory, _selectedCategory, descriptionController.text);
                   },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Color(0xffFFBF9B), // Set background color to orange
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Add",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Center(
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Color(0xffFFBF9B),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Add",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-
             ],
           ),
         ),

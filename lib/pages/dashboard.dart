@@ -253,7 +253,7 @@ class _DashboardState extends State<Dashboard> {
                 context, MaterialPageRoute(builder: (context) => Category()));
           } else if (index == 2) {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => expensePage()));
+                MaterialPageRoute(builder: (context) => ExpensePage()));
           } else if (index == 3) {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => transation()));

@@ -1,6 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import '../widget/categoryService.dart'; // Import Firestore
 
 class Category extends StatefulWidget {
   @override
@@ -27,47 +26,16 @@ class _CategoryScreenState extends State<Category> {
 
   Future<void> fetchCategories() async {
     try {
-      List<List<CategoryList>> categories = await getCategories();
+      List<List<Map<String, String>>> categories = await CategoryService.getCategories();
+
       setState(() {
-        incomeCategories = categories[0];
-        expenseCategories = categories[1];
+        incomeCategories = categories[0].map((category) => CategoryList(category['name']!, category['imagePath']!)).toList();
+        expenseCategories = categories[1].map((category) => CategoryList(category['name']!, category['imagePath']!)).toList();
       });
     } catch (error) {
       print("Error fetching categories: $error");
       // Handle error here
     }
-  }
-
-  Future<List<List<CategoryList>>> getCategories() async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user = auth.currentUser;
-    String uid = user?.uid ?? '';
-
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    DocumentReference userDocRef = firestore.collection('users').doc(uid);
-
-    CollectionReference incomeCategoriesCollection = userDocRef.collection('incomeCategories');
-    CollectionReference expenseCategoriesCollection = userDocRef.collection('expenseCategories');
-
-    QuerySnapshot incomeSnapshot = await incomeCategoriesCollection.get();
-    QuerySnapshot expenseSnapshot = await expenseCategoriesCollection.get();
-
-    List<CategoryList> incomeCategoryList = [];
-    List<CategoryList> expenseCategoryList = [];
-
-    incomeSnapshot.docs.forEach((doc) {
-      String name = doc.get('name');
-      String imagePath = doc.get('imagePath');
-      incomeCategoryList.add(CategoryList(name, imagePath));
-    });
-
-    expenseSnapshot.docs.forEach((doc) {
-      String name = doc.get('name');
-      String imagePath = doc.get('imagePath');
-      expenseCategoryList.add(CategoryList(name, imagePath));
-    });
-
-    return [incomeCategoryList, expenseCategoryList];
   }
 
   @override
@@ -143,7 +111,6 @@ class _CategoryScreenState extends State<Category> {
               itemCount: selectedCategories.length + 1,
               itemBuilder: (BuildContext context, int index) {
                 if (index == selectedCategories.length) {
-                  // Add New button
                   return Card(
                     child: ListTile(
                       onTap: () {
@@ -153,14 +120,20 @@ class _CategoryScreenState extends State<Category> {
                     ),
                   );
                 } else {
-                  // Category item
                   CategoryList category = selectedCategories[index];
                   return Card(
                     child: ListTile(
-                      leading: Image.asset(
-                        category.imagePath,
-                        width: 30,
-                        height: 30,
+                      leading: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                            category.imagePath, // Assuming category.imagePath contains the file path
+                            width: 30,
+                            height: 30,
+                          ),
+                        ),
                       ),
                       title: Text(category.name),
                       onTap: () {
