@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widget/categoryService.dart'; // Import Firestore
 
@@ -37,6 +39,39 @@ class _CategoryScreenState extends State<Category> {
       // Handle error here
     }
   }
+
+  void addNewCategory(String name, String imagePath) async {
+    // Update local state
+    setState(() {
+      final newCategory = CategoryList(name, imagePath);
+      if (isExpenseSelected) {
+        expenseCategories.add(newCategory);
+      } else {
+        incomeCategories.add(newCategory);
+      }
+    });
+
+    try {
+      // Update Firebase
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      String uid = user?.uid ?? '';
+
+      DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      CollectionReference categoriesCollectionRef = userDocRef.collection(isExpenseSelected ? 'expenseCategories' : 'incomeCategories');
+
+      await categoriesCollectionRef.add({
+        'name': name,
+        'imagePath': imagePath,
+      });
+
+      print('New category added to Firebase.');
+    } catch (error) {
+      print('Error adding category to Firebase: $error');
+      // Handle error here
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +149,13 @@ class _CategoryScreenState extends State<Category> {
                   return Card(
                     child: ListTile(
                       onTap: () {
-                        // Implement adding a new category
+                        // Show dialog to add new category
+                        showDialog(
+                          context: context,
+                          builder: (context) => AddCategoryDialog(
+                            onAddCategory: addNewCategory,
+                          ),
+                        );
                       },
                       title: Center(child: Text('Add New')),
                     ),
@@ -147,6 +188,55 @@ class _CategoryScreenState extends State<Category> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class AddCategoryDialog extends StatefulWidget {
+  final Function(String, String) onAddCategory;
+
+  const AddCategoryDialog({Key? key, required this.onAddCategory}) : super(key: key);
+
+  @override
+  _AddCategoryDialogState createState() => _AddCategoryDialogState();
+}
+
+class _AddCategoryDialogState extends State<AddCategoryDialog> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController imagePathController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Add New Category'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: InputDecoration(labelText: 'Name'),
+          ),
+          TextField(
+            controller: imagePathController,
+            decoration: InputDecoration(labelText: 'Image Path'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            widget.onAddCategory(nameController.text, imagePathController.text);
+            Navigator.of(context).pop();
+          },
+          child: Text('Add'),
+        ),
+      ],
     );
   }
 }
